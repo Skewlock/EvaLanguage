@@ -1,0 +1,33 @@
+letter          =   "A" | "B" | "C" | "D" | "E" | "F" | "G"
+                    | "H" | "I" | "J" | "K" | "L" | "M" | "N"
+                    | "O" | "P" | "Q" | "R" | "S" | "T" | "U"
+                    | "V" | "W" | "X" | "Y" | "Z" | "a" | "b"
+                    | "c" | "d" | "e" | "f" | "g" | "h" | "i"
+                    | "j" | "k" | "l" | "m" | "n" | "o" | "p"
+                    | "q" | "r" | "s" | "t" | "u" | "v" | "w"
+                    | "x" | "y" | "z" ;
+digit           =   "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+symbol          =   "[" | "]" | "{" | "}" | "(" | ")" | "<" | ">"
+                    | "'" | '"' | "=" | "|" | "." | "," | ";" ;
+character       =   letter | digit | symbol | "_" ;
+sign            =   "+" | "-" ;
+integer         =   "0" | ([sign] digit {digit | "0"}) ;
+float           =   [sign] (digit | "0") {digit | "0"} ,
+                    "." {digit | "0"} (digit | "0") ;
+number          =   float | integer ;
+
+operator        =   "+" | "-" | "*" | "/" | "%" | "<" | ">" | "<=" | ">="
+                    | "!=" | "==" ;
+expr_inner      =   number , operator , number ;
+expr            =   ("(" , expr_inner , ")") | expr_inner ;
+calc            =   (expr operator {expr operator expr}) | expr ;
+
+keywords        =   "create" | type | "for" | "while" | "if" | "else"
+                    | "func" | "return" | "include" | "code" | "params"
+                    | "none" | "true" | "false" | "break" ;
+identifier      =   (letter , {letter | digit}) - keywords ;
+type            =   "int" | "float" | "bool" | "char" | "void" ;
+value           =   integer | float | char | ("true" | "false") ;
+varAffectation  =   name , "=" , value , ";" ;
+varDeclaration  =   "create" type identifer , ";" ;
+varDeclAffect   =   "create" type (identifer , ";") | varAffectation ;

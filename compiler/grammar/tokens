@@ -1,0 +1,8 @@
+TT_INT
+TT_FLOAT
+TT_EOF
+TT_OPERATION        "+-*/%"
+
+
+TT_LPAREN           '('
+TT_RPAREN           ')'

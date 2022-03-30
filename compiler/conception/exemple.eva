@@ -1,0 +1,33 @@
+include "stdio"
+
+create func main[return: int, params: [none]]
+code
+{
+    create int i;
+    create int n;
+
+    @ initialize first and second terms
+    create int t1 = 0;
+    create int t2 = 1;
+
+    @ initialize the next term (3rd term)
+    create int nextTerm;
+    nextTerm = t1 + t2;
+
+    @ get no of terms by the user
+    n = input("Enter the number of terms: ");
+    
+    @ print the first two terms t1 and t2
+    print("Fibonnacci Series: " + t1 + t2);
+
+    for (i, 3, i == n, i += 1)
+    {
+        print(nextTerm);
+        t1 = t2;
+        t2 = nextTerm;
+        nextTerm = t1 + t2;
+    }
+    return: 0;
+}
+
+main();
