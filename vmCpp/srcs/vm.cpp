@@ -1,13 +1,17 @@
 #include "../include/vm.hpp"
 
-VirtualMachine::VirtualMachine(Ram *r)
+VirtualMachine::VirtualMachine(int ram_size)
 {
-    this->ram = r;
+    Buses *b = new Buses();
+    // buses instance must be the same between CPU and RAM
+    this->ram = new Ram(ram_size, b);
+    this->cpu = new Cpu(b);
 }
 
 VirtualMachine::~VirtualMachine()
 {
     delete this->ram;
+    delete this->cpu;
 }
 
 Ram *VirtualMachine::getRam(void)

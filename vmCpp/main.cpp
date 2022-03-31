@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
         }
         ram_size = (uint32) temp;
     }
-    vm = new VirtualMachine(new Ram(ram_size));
+    vm = new VirtualMachine(ram_size);
     vm->getRam()->setMemoryTo("test.txt");
     //vm->displayRam();
     delete (vm);

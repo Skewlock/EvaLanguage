@@ -1,14 +1,17 @@
 #include "../include/ram.hpp"
+#include "../include/buses.hpp"
 
-Ram::Ram(uint32 size)
+Ram::Ram(uint32 size, Buses *b)
 {
     this->ram_size = size;
     this->ram = new uint8[this->ram_size];
+    this->buses = b;
 }
 
 Ram::~Ram()
 {
-    delete (ram);
+    delete ram;
+    delete buses;
 }
 
 uint8 Ram::readAddr8(uint32 address)
