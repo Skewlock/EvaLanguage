@@ -2,6 +2,7 @@
 #define PROCESSOR_HPP
 
 #include "main.hpp"
+#include "vm.hpp"
 
 enum {
     R_R0 = 0,
@@ -19,18 +20,30 @@ enum {
     R_SP,   // Stack Pointer
     R_LR,   // Link register
     R_SR,   // Status register
-    R_COUNT
+    R_COUNT // Register count
 };
+
+//instruction:
+
+// 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
 
 class Cpu
 {
     private:
+        Buses *buses;
         uint64 *reg;
+        void fetchNextOp(void);
+        uint8 *decodeOp();
+        void executeOp(uint8 *instruction);
 
     public:
-        Cpu();
+        Cpu(Buses *b);
+        ~Cpu();
         uint64 *getRegisters(void);
+        void setRegister(int r, uint64 value);
         void init(void);
+        void updateBuses(void);
+        void processOp(void);
 };
 
 #endif
