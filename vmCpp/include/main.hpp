@@ -12,4 +12,10 @@ typedef unsigned char uint8; // byte
 typedef unsigned int uint32; // max RAM length
 typedef unsigned long int uint64; // length of instruction
 
+#include "buses.hpp"
+#include "clock.hpp"
+#include "cpu.hpp"
+#include "ram.hpp"
+#include "vm.hpp"
+
 #endif

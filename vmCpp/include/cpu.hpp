@@ -2,7 +2,8 @@
 #define PROCESSOR_HPP
 
 #include "main.hpp"
-#include "vm.hpp"
+
+class Buses;
 
 enum {
     R_R0 = 0,

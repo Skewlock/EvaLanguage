@@ -21,6 +21,11 @@ Buses::Buses()
     this->readWritePin = READ;
 }
 
+Buses::~Buses()
+{
+    
+}
+
 /**
  * @brief return the data bus 
  * 

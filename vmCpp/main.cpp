@@ -1,10 +1,28 @@
+/**
+ * @file main.cpp
+ * @author Mathias Couriol (mathias.couriol@gmail.com)
+ * @brief The main to run the vm
+ * @version 0.1
+ * @date 2022-04-13
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include "include/main.hpp"
-#include "include/vm.hpp"
 
+/**
+ * @brief the main to run
+ * 
+ * @param argc 
+ * @param argv args must be [program_name, ram_size]
+ * @return int 
+ */
 int main(int argc, char *argv[])
 {
     uint32 ram_size;
     VirtualMachine *vm;
+
+    // checking correct args size
     if (argc < 2)
         ram_size = RAM_MIN;
     else 
@@ -17,8 +35,10 @@ int main(int argc, char *argv[])
         }
         ram_size = (uint32) temp;
     }
+
+    //create the VM with the good RAM size
     vm = new VirtualMachine(ram_size);
-    vm->getRam()->setMemoryTo("test.txt");
-    //vm->displayRam();
+    vm->getRam()->setMemoryTo("memory.mem"); // set ram to the content of the file
+    vm->displayRam();
     delete (vm);
 }
