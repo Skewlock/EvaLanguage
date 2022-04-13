@@ -20,12 +20,12 @@ class Buses
     public:
         Buses();
         ~Buses();
-        uint64 Buses::getDataBus(void);
-        uint32 Buses::getAddressBus(void);
-        uint8 Buses::getReadWritePin(void);
-        void Buses::setDataBus(uint64 data);
-        void Buses::setAddressBus(uint32 address);
-        void Buses::setReadWritePin(uint8 pin);
+        uint64 getDataBus(void);
+        uint32 getAddressBus(void);
+        uint8 getReadWritePin(void);
+        void setDataBus(uint64 data);
+        void setAddressBus(uint32 address);
+        void setReadWritePin(uint8 pin);
 };
 
 #endif

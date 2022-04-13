@@ -9,7 +9,6 @@
  * 
  */
 #include "../include/cpu.hpp"
-#include "../include/buses.hpp"
 
 /**
  * @brief Construct a new Cpu:: Cpu object
@@ -20,6 +19,7 @@ Cpu::Cpu(Buses *b)
 {
     this->buses = b;
     this->reg = new uint64[15];
+    this->reg[R_PC] = 0x1000;
 }
 
 /**
@@ -79,5 +79,5 @@ void Cpu::fetchNextOp(void)
 uint8 *Cpu::decodeOp(void)
 {
     uint64 inst = this->reg[R_IR];
-    
+    //TODO: Complete this
 }

@@ -9,7 +9,6 @@
  * 
  */
 #include "../include/ram.hpp"
-#include "../include/buses.hpp"
 
 /**
  * @brief Construct a new Ram:: Ram object
@@ -32,28 +31,6 @@ Ram::~Ram()
 {
     delete ram;
     delete buses;
-}
-
-/**
- * @brief Read 8 bits from RAM
- * 
- * @param address 
- * @return uint8 
- */
-uint8 Ram::readAddr8(uint32 address)
-{
-    return (this->ram[address]);
-}
-
-/**
- * @brief Store 8 bits in RAM
- * 
- * @param address 
- * @param data 
- */
-void Ram::storeAddr8(uint32 address, uint8 data)
-{
-    this->ram[address] = data;
 }
 
 /**
@@ -84,4 +61,60 @@ void Ram::setMemoryTo(std::string fileName)
         i++;
     }
     file.close();
+}
+
+/**
+ * @brief Read 8 bits from RAM
+ * 
+ * @param address 
+ * @return uint8 
+ */
+uint8 Ram::readAddr8(uint32 address)
+{
+    return (this->ram[address]);
+}
+
+/**
+ * @brief Store 8 bits in RAM
+ * 
+ * @param address 
+ * @param data 
+ */
+void Ram::storeAddr8(uint32 address, uint8 data)
+{
+    this->ram[address] = data;
+}
+
+/**
+ * @brief read a 64 bits int from memory
+ * 
+ * @param address
+ * @return uint64
+ */
+uint64 Ram::readAddr64(uint32 address)
+{
+    uint64 res = ((uint64)this->ram[address] << 56) | ((uint64)this->ram[address + 1] << 48)
+    | ((uint64)this->ram[address + 2] << 40) | ((uint64)this->ram[address + 3] << 32)
+    | ((uint64)this->ram[address + 4] << 24) | ((uint64)this->ram[address + 5] << 16)
+    | ((uint64)this->ram[address + 6] << 8) | ((uint64)this->ram[address + 7]);
+
+    return res;
+}
+
+/**
+ * @brief store a 64 bits int in memory
+ * 
+ * @param address 
+ * @param data 
+ */
+void Ram::storeAddr64(uint32 address, uint64 data)
+{
+    this->ram[address]     = data & 0xFF00000000000000 >> 56;
+    this->ram[address + 1] = data & 0x00FF000000000000 >> 48;
+    this->ram[address + 2] = data & 0x0000FF0000000000 >> 40;
+    this->ram[address + 3] = data & 0x000000FF00000000 >> 32;
+    this->ram[address + 4] = data & 0x00000000FF000000 >> 24;
+    this->ram[address + 5] = data & 0x0000000000FF0000 >> 16;
+    this->ram[address + 6] = data & 0x000000000000FF00 >> 8 ;
+    this->ram[address + 7] = data & 0x00000000000000FF;
 }

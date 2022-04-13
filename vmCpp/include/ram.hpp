@@ -4,6 +4,8 @@
 #include "main.hpp"
 #include <fstream>
 
+class Buses;
+
 class Ram
 {
     private:
@@ -16,8 +18,11 @@ class Ram
         ~Ram();
         uint8 readAddr8(uint32 address);
         void storeAddr8(uint32 address, uint8 data);
+        uint64 readAddr64(uint32 address);
+        void storeAddr64(uint32 address, uint64 data);
         void setMemoryTo(std::string fileName);
         uint32 getRamSize(void);
+        void updateBuses(void);
 };
 
 #endif
