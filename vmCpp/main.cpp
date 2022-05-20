@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
     //create the VM with the good RAM size
     vm = new VirtualMachine(ram_size);
-    vm->getRam()->setMemoryTo("memory.mem"); // set ram to the content of the file
+    //vm->getRam()->setMemoryTo("memory.mem"); // set ram to the content of the file
     vm->displayRam();
     delete (vm);
 }

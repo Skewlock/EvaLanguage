@@ -86,6 +86,28 @@ void Ram::storeAddr8(uint32 address, uint8 data)
 }
 
 /**
+ * @brief update the buses with the processor (and perform RAM op)
+ * 
+ */
+void Ram::updateBuses(void)
+{
+    uint64 data;
+    uint32 address = this->buses->getAddressBus();
+    uint8 rw = this->buses->getReadWritePin();
+    if (rw == READ) // if we're on read mode
+    {
+        data = this->readAddr64(address);
+        this->buses->setDataBus(data);
+    }
+    
+    if (rw == WRITE) // if we're on write mode
+    {
+        data = this->buses->getDataBus();
+        this->storeAddr64(address, data);
+    }
+}
+
+/**
  * @brief read a 64 bits int from memory
  * 
  * @param address
