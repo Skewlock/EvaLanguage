@@ -20,6 +20,9 @@ class VirtualMachine
         ~VirtualMachine();
         void displayRam(void);
         Ram *getRam(void);
+        void cpuCycle(void);
+        void displayRegisters(void);
+        Cpu *getCpu(void);
 
         // data buses and CPU pins
         uint64 getDataBus(void);
