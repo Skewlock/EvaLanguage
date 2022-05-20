@@ -69,9 +69,9 @@ class Cpu
         Buses *buses;
         uint64 *regG;
         uint48 *regS;
-        void fetchNextOp(void);
-        int *decodeOp();
-        void executeOp(int *inst_tab);
+        void decodeOp(void);
+        void executeOp(void);
+        int inst_tab[7];
 
     public:
         Cpu(Buses *b);
@@ -82,7 +82,9 @@ class Cpu
         void setSRegisters(int r, uint48 value);
         void init(void);
         void updateBuses(uint8 rw, uint32 addr, uint64 data);
-        void processOp(void);
+        void cycle(void);
+        void fetchNextOp1(void);
+        void fetchNextOp2(void);
 };
 
 #endif
