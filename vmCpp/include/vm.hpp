@@ -1,7 +1,10 @@
 #ifndef VM_HPP
 #define VM_HPP
 
-#include "main.hpp"
+#include "general.hpp"
+#include "cpu.hpp"
+#include "ram.hpp"
+#include "buses.hpp"
 
 class Cpu;
 class Ram;

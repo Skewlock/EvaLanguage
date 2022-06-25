@@ -18,7 +18,7 @@ Buses::Buses()
 {
     this->addressBus = 0;
     this->dataBus = 0;
-    this->readWritePin = READ;
+    this->readWritePin = 0;
 }
 
 Buses::~Buses()
@@ -56,6 +56,11 @@ uint8 Buses::getReadWritePin(void)
     return (this->readWritePin);
 }
 
+uint8 Buses::getDataSizeBus(void)
+{
+    return (this->dataSizeBus);
+}
+
 /**
  * @brief Set the data bus
  * 
@@ -84,4 +89,50 @@ void Buses::setAddressBus(uint32 address)
 void Buses::setReadWritePin(uint8 pin)
 {
     this->readWritePin= pin;
+}
+
+
+/**
+ * @brief set the data size bus
+ * 
+ * @param size 
+ */
+void Buses::setDataSizeBus(uint8 size)
+{
+    this->dataSizeBus = size;
+}
+
+void Buses::addObserver(Peripheral *p)
+{
+    this->observerList.push_back(p);
+}
+
+void Buses::setBusesAndNotify(uint8 rw, uint32 address, uint8 size)
+{
+    this->setAddressBus(address);
+    this->setReadWritePin(rw);
+    this->setDataSizeBus(size);
+    this->notifyPeriph();
+}
+
+void Buses::setBusesAndNotify(uint8 rw, uint32 address, uint64 data, uint8 size)
+{
+    this->setAddressBus(address);
+    this->setReadWritePin(rw);
+    this->setDataBus(data);
+    this->setDataSizeBus(size);
+    this->notifyPeriph();
+}
+
+void Buses::notifyPeriph()
+{
+    Peripheral *p;
+    std::list<Peripheral *>::iterator it = this->observerList.begin();
+    for (long unsigned int i = 0; i < this->observerList.size(); i++)
+    {
+        p = (*it);
+        if ((*it)->getBeginAddr() <= this->getAddressBus() && this->getAddressBus() <= (*it)->getEndAddr())
+            p->execOrder();
+        std::advance(it, 1);
+    }
 }

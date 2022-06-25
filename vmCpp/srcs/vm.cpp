@@ -21,6 +21,7 @@ VirtualMachine::VirtualMachine(int ram_size)
     // buses instance must be the same between CPU and RAM
     this->ram = new Ram(ram_size, b);
     this->cpu = new Cpu(b);
+    b->addObserver(this->ram);
 }
 
 /**
