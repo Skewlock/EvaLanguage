@@ -14,7 +14,7 @@ $(BIN):	$(OBJ)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-clean: $(BIN)
+clean:
 	rm -rf $(OBJ_DIR)/*.o
 
 fclean: clean
