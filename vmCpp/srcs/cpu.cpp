@@ -17,6 +17,7 @@
  */
 Cpu::Cpu(Buses *b)
 {
+    this->running = true;
     this->buses = b;
     this->regG = new uint64[R_GCOUNT];
     this->regG[R_PC] = 0x1000;
@@ -577,6 +578,10 @@ void Cpu::executeOp()
             data = this->regG[this->inst_tab[3]];
             this->buses->setBusesAndNotify(WRITE, this->regG[R_PC] + this->inst_tab[6], data, 8);
             break;
+        
+        case OP_END:
+            this->running = false;
+            break;
     }
 }
 
@@ -585,4 +590,32 @@ void Cpu::cycle(void)
     this->fetchNextOp();
     this->decodeOp();
     this->executeOp();
+}
+
+void Cpu::run(void)
+{
+    int count = 0;
+    while (running)
+    {
+        this->cycle();
+        printf("Cycle %d:\n", count);
+        this->displayRegisters();
+        count++;
+    }
+    printf("Ending...\n");
+}
+
+void Cpu::displayRegisters(void)
+{
+    uint64 *r = this->getGRegisters();
+    for (int i = 0; i < R_GCOUNT; i++)
+    {
+        printf("RG%d: 0x%lx\n", i, r[i]);
+    }
+    uint48 *r2 = this->getSRegisters();
+    for (int i = 0; i < R_SCOUNT; i++)
+    {
+        printf("RS%d: 0x%lx\n", i, r2[i].bits);
+    }
+    printf("\n");
 }

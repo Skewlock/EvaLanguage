@@ -31,7 +31,6 @@ enum
     OP_JMP = 0x01,
     OP_BRL = 0x02,
     OP_BRX = 0X03,
-    OP_END = 0x04,
     OP_ADD = 0x10,
     OP_SUB = 0x11,
     OP_MUL = 0x12,
@@ -51,6 +50,7 @@ enum
     OP_STW = 0x25,
     OP_PSH = 0x26,
     OP_POP = 0x27,
+    OP_END = 0x3F,
 };
 
 enum
@@ -87,6 +87,7 @@ class Cpu
         Buses *buses;
         uint64 *regG;
         uint48 *regS;
+        bool running;
         void decodeOp(void);
         void executeOp(void);
         void fetchNextOp(void);
@@ -101,6 +102,8 @@ class Cpu
         void setSRegisters(int r, uint48 value);
         void init(void);
         void cycle(void);
+        void run(void);
+        void displayRegisters(void);
 };
 
 #endif
