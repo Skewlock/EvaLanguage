@@ -17,6 +17,9 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 clean: $(BIN)
 	rm -rf $(OBJ_DIR)/*.o
 
-re: all clean
+fclean: clean
+	rm -rf $(BIN)
+
+re: fclean all
 
 .PHONY: clean re all

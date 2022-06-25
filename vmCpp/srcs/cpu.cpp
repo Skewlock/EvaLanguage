@@ -76,26 +76,12 @@ void Cpu::setSRegisters(int r, uint48 value)
 }
 
 /**
- * @brief Update the buses to allow communication with RAM or other devices
- * 
- */
-void Cpu::updateBuses(uint8 rw, uint32 addr, uint64 data)
-{
-    // :(
-}
-
-/**
  * @brief Get the next OP from RAM
  * 
  */
-void Cpu::fetchNextOp1(void)
+void Cpu::fetchNextOp(void)
 {
-    this->buses->setAddressBus(this->regG[R_PC]);
-    this->buses->setReadWritePin(READ);
-}
-
-void Cpu::fetchNextOp2(void)
-{
+    this->buses->setBusesAndNotify(READ, this->regG[R_PC], 8);
     uint64 instruction = (this->buses->getDataBus() & 0xFFFFFFFFFFFF0000) >> 16;
     this->regS[R_IR] = *(uint48 *) &instruction;
     this->regG[R_PC] += 6;
@@ -129,24 +115,234 @@ void Cpu::decodeOp(void)
  */
 void Cpu::executeOp()
 {
-    //printf("CPU: %lx\n", inst_tab[0]);
+    bool n, z, c, v;
+    uint64 op = 0;
+    uint64 res = 0;
+    uint64 data = 0;
     switch (this->inst_tab[0])
     {
+        //Program Flow
+
         case OP_NOP:
             break;
 
         case OP_JMP:
-            this->regG[R_PC] += this->inst_tab[6] * 6;
+            n = (this->regS[R_SR].bits & 0x0000000000000008) >> 3;
+            z = (this->regS[R_SR].bits & 0x0000000000000004) >> 2;
+            c = (this->regS[R_SR].bits & 0x0000000000000002) >> 1;
+            v = (this->regS[R_SR].bits & 0x0000000000000001);
+            switch (this->inst_tab[3])
+            {   
+                case CC_EQ:
+                    if (z)
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_NE:
+                    if (!z)
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_CS:
+                    if (c)
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_CC:
+                    if (!c)
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_MI:
+                    if (n)
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_PL:
+                    if (!n)
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_VS:
+                    if (v)
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_VC:
+                    if (!v)
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_HI:
+                    if (c && !z)
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_LS:
+                    if (!c && z)
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_GE:
+                    if (n == v)
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_LT:
+                    if (n != v)
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_GT:
+                    if (!z && (n == v))
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_LE:
+                    if (z || (n != v))
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+                
+                case CC_AL:
+                    this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+
+            }
             break;
         
         case OP_BRL:
-            this->regG[R_LR] = this->regG[R_PC] + 6;
-            this->regG[R_PC] += this->inst_tab[6] * 6;
+            n = (this->regS[R_SR].bits & 0x0000000000000008) >> 3;
+            z = (this->regS[R_SR].bits & 0x0000000000000004) >> 2;
+            c = (this->regS[R_SR].bits & 0x0000000000000002) >> 1;
+            v = (this->regS[R_SR].bits & 0x0000000000000001);
+            switch (this->inst_tab[3])
+            {   
+                case CC_EQ:
+                    if (z)
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_NE:
+                    if (!z)
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_CS:
+                    if (c)
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_CC:
+                    if (!c)
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_MI:
+                    if (n)
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_PL:
+                    if (!n)
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_VS:
+                    if (v)
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_VC:
+                    if (!v)
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_HI:
+                    if (c && !z)
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_LS:
+                    if (!c && z)
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_GE:
+                    if (n == v)
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_LT:
+                    if (n != v)
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_GT:
+                    if (!z && (n == v))
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_LE:
+                    if (z || (n != v))
+                    {
+                        this->regG[R_LR] = this->regG[R_PC] + 6;
+                        this->regG[R_PC] += this->inst_tab[6] * 6;
+                    }
+                    break;
+                
+                case CC_AL:
+                    this->regG[R_LR] = this->regG[R_PC] + 6;
+                    this->regG[R_PC] += this->inst_tab[6] * 6;
+                    break;
+
+            }
             break;
         
         case OP_BRX:
             this-> regG[R_PC] = this->regG[R_LR];
             break;
+        
+
+        // Operations
         
         case OP_ADD:
             // no flag update
@@ -199,7 +395,6 @@ void Cpu::executeOp()
             break;
 
         case OP_SUB:
-            uint64 op;
             if (!this->inst_tab[2])
                 op = this->regG[this->inst_tab[5]];
             else
@@ -263,17 +458,131 @@ void Cpu::executeOp()
             }
             break;
         
+        case OP_DIV:
+            //TODO
+            break;
+
+        case OP_AND:
+            if (!this->inst_tab[1])
+            {
+                if (!this->inst_tab[2])
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] & this->regG[this->inst_tab[5]];
+                else
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] & (this->inst_tab[6] | 0xFFFFFFFFF0000000);
+            }
+            break;
+        
+        case OP_BOR:
+            if (!this->inst_tab[1])
+            {
+                if (!this->inst_tab[2])
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] | this->regG[this->inst_tab[5]];
+                else
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] | (this->inst_tab[6] | 0xFFFFFFFFF0000000);
+            }
+            break;
+
+        case OP_XOR:
+            if (!this->inst_tab[1])
+            {
+                if (!this->inst_tab[2])
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] ^ this->regG[this->inst_tab[5]];
+                else
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] ^ (this->inst_tab[6] | 0xFFFFFFFFF0000000);
+            }
+            break;
+        
+        case OP_RSH:
+            if (!this->inst_tab[1])
+            {
+                if (!this->inst_tab[2])
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] >> this->regG[this->inst_tab[5]];
+                else
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] >> this->inst_tab[6];
+            }
+            break;
+        
+        case OP_LSH:
+            if (!this->inst_tab[1])
+            {
+                if (!this->inst_tab[2])
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] >> this->regG[this->inst_tab[5]];
+                else
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] >> this->inst_tab[6];
+            }
+            break;
+
         case OP_MOV:
             if (!this->inst_tab[2])
                 this->regG[inst_tab[3]] = this->regG[inst_tab[5]];
             else
                 this->regG[inst_tab[3]] = inst_tab[6];
             break;
+        
+        case OP_CMP:
+            if (!this->inst_tab[2])
+                op = this->regG[this->inst_tab[5]];
+            else
+                op = this->inst_tab[6];
+            op = ~op + 1;
+            // flag C
+            if (this->regG[this->inst_tab[5]] > (0xFFFFFFFFFFFFFFFF - this->regG[this->inst_tab[4]]))
+                this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000002;
+
+            if (!this->inst_tab[2])
+            {
+                // flag V
+                if (((this->regG[this->inst_tab[3]] & 0x8000000000000000 >> 63) == 1 && (this->regG[this->inst_tab[4]] & 0x8000000000000000 >> 63) == 0 && (op & 0x8000000000000000 >> 63) == 0) || ((this->regG[this->inst_tab[3]] & 0x8000000000000000 >> 63) == 0 && (this->regG[this->inst_tab[4]] & 0x8000000000000000 >> 63) == 1 && (op & 0x8000000000000000 >> 63) == 1))
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000001;
+                res = this->regG[this->inst_tab[4]] + op;
+            }
+            else
+            {
+                // flag V
+                if (((this->regG[this->inst_tab[3]] & 0x8000000000000000 >> 63) == 1 && (this->regG[this->inst_tab[4]] & 0x8000000000000000 >> 63) == 0 && (op & 0x8000000 >> 27) == 0) || ((this->regG[this->inst_tab[3]] & 0x8000000000000000 >> 63) == 0 && (this->regG[this->inst_tab[4]] & 0x8000000000000000 >> 63) == 1 && (op & 0x8000000 >> 27) == 1))
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000001;
+            }
+            res = this->regG[this->inst_tab[4]] + op;
+
+            // flag Z
+            if (res == 0)
+                this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000004;
+
+            // flag N
+            if ((res & 0x8000000000000000 >> 63) == 1)
+                this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000008;
+            break;
+
+        // Memory
+
+        case OP_LDW:
+            this->buses->setBusesAndNotify(READ, this->regG[R_PC] + this->inst_tab[6], 8);
+            data = this->buses->getDataBus();
+            this->regG[this->inst_tab[3]] = data;
+            break;
+        
+        case OP_LDH:
+            this->buses->setBusesAndNotify(READ, this->regG[R_PC] + this->inst_tab[6], 4);
+            data = this->buses->getDataBus();
+            this->regG[this->inst_tab[3]] = data;
+            break;
+        
+        case OP_LDB:
+            this->buses->setBusesAndNotify(READ, this->regG[R_PC] + this->inst_tab[6], 1);
+            data = this->buses->getDataBus();
+            this->regG[this->inst_tab[3]] = data;
+            break;
+        
+        case OP_STW:
+            data = this->regG[this->inst_tab[3]];
+            this->buses->setBusesAndNotify(WRITE, this->regG[R_PC] + this->inst_tab[6], data, 8);
+            break;
     }
 }
 
 void Cpu::cycle(void)
 {
+    this->fetchNextOp();
     this->decodeOp();
     this->executeOp();
 }

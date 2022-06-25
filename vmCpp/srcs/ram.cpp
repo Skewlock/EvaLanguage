@@ -16,7 +16,8 @@
  * @param size 
  * @param b 
  */
-Ram::Ram(uint32 size, Buses *b)
+Ram::Ram(uint32 size, Buses *b) : 
+Peripheral::Peripheral(0, size)
 {
     this->ram_size = size;
     this->ram = new uint8[this->ram_size];
@@ -89,6 +90,8 @@ void Ram::storeAddr8(uint32 address, uint8 data)
  * @brief update the buses with the processor (and perform RAM op)
  * 
  */
+
+/*
 void Ram::updateBuses(void)
 {
     uint64 data;
@@ -105,6 +108,33 @@ void Ram::updateBuses(void)
         data = this->buses->getDataBus();
         this->storeAddr64(address, data);
     }
+}*/
+
+/**
+ * @brief read a 32 bits int from memory
+ * 
+ * @param address 
+ * @return uint32 
+ */
+uint32 Ram::readAddr32(uint32 address)
+{
+    uint32 res = ((uint32)this->ram[address] << 24) | ((uint32)this->ram[address + 1] << 16)
+    | ((uint32)this->ram[address + 2] << 8) | ((uint32)this->ram[address + 3]);
+    return (res);
+}
+
+/**
+ * @brief store a 32 bits int in memory
+ * 
+ * @param address 
+ * @param data 
+ */
+void Ram::storeAddr32(uint32 address, uint32 data)
+{
+    this->ram[address]      = data & 0xFF000000 >> 24;
+    this->ram[address + 1]  = data & 0x00FF0000 >> 16;
+    this->ram[address + 2]  = data & 0x0000FF00 >> 8;
+    this->ram[address + 3]  = data & 0x000000FF;
 }
 
 /**
@@ -139,4 +169,47 @@ void Ram::storeAddr64(uint32 address, uint64 data)
     this->ram[address + 5] = data & 0x0000000000FF0000 >> 16;
     this->ram[address + 6] = data & 0x000000000000FF00 >> 8 ;
     this->ram[address + 7] = data & 0x00000000000000FF;
+}
+
+std::string Ram::getName()
+{
+    return "RAM, from " + std::to_string(this->beginning_address) + " to " + std::to_string(this->end_address);
+}
+
+void Ram::execOrder()
+{
+    if (this->buses->getReadWritePin() == READ)
+    {
+        switch(this->buses->getDataSizeBus())
+        {
+            case 1:
+                this->buses->setDataBus(this->readAddr8(this->buses->getAddressBus()));
+                break;
+            
+            case 4:
+                this->buses->setDataBus(this->readAddr32(this->buses->getAddressBus()));
+                break;
+
+            case 8:
+                this->buses->setDataBus(this->readAddr64(this->buses->getAddressBus()));
+                break;
+        }
+    }
+    else if (this->buses->getReadWritePin() == WRITE)
+    {
+        switch(this->buses->getDataSizeBus())
+        {
+            case 1:
+                this->storeAddr8(this->buses->getAddressBus(), this->buses->getDataBus() >> 56);
+                break;
+            
+            case 4:
+                this->storeAddr32(this->buses->getAddressBus(), this->buses->getDataBus() >> 32);
+                break;
+            
+            case 8:
+                this->storeAddr64(this->buses->getAddressBus(), this->buses->getDataBus());
+                break;
+        }
+    }
 }

@@ -1,9 +1,29 @@
 #ifndef PROCESSOR_HPP
 #define PROCESSOR_HPP
 
-#include "main.hpp"
+#include "general.hpp"
+#include "buses.hpp"
 
 class Buses;
+
+enum 
+{
+    CC_EQ = 0x0,
+    CC_NE = 0x1,
+    CC_CS = 0x2,
+    CC_CC = 0x3,
+    CC_MI = 0x4,
+    CC_PL = 0x5,
+    CC_VS = 0x6,
+    CC_VC = 0x7,
+    CC_HI = 0x8,
+    CC_LS = 0x9,
+    CC_GE = 0xA,
+    CC_LT = 0xB,
+    CC_GT = 0xC,
+    CC_LE = 0xD,
+    CC_AL = 0xE
+};
 
 enum
 {
@@ -11,6 +31,7 @@ enum
     OP_JMP = 0x01,
     OP_BRL = 0x02,
     OP_BRX = 0X03,
+    OP_END = 0x04,
     OP_ADD = 0x10,
     OP_SUB = 0x11,
     OP_MUL = 0x12,
@@ -29,7 +50,7 @@ enum
     OP_STH = 0x24,
     OP_STW = 0x25,
     OP_PSH = 0x26,
-    OP_POP = 0x27
+    OP_POP = 0x27,
 };
 
 enum
@@ -59,9 +80,6 @@ enum {
     R_GCOUNT // Register count
 };
 
-//instruction:
-
-// 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
 
 class Cpu
 {
@@ -71,6 +89,7 @@ class Cpu
         uint48 *regS;
         void decodeOp(void);
         void executeOp(void);
+        void fetchNextOp(void);
         int inst_tab[7];
 
     public:
@@ -81,10 +100,7 @@ class Cpu
         uint48 *getSRegisters(void);
         void setSRegisters(int r, uint48 value);
         void init(void);
-        void updateBuses(uint8 rw, uint32 addr, uint64 data);
         void cycle(void);
-        void fetchNextOp1(void);
-        void fetchNextOp2(void);
 };
 
 #endif

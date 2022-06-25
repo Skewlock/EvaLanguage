@@ -46,9 +46,6 @@ int main(int argc, char *argv[])
     while (count < 3)
     {
         printf("Cycle %d\n\n", count);
-        vm->getCpu()->fetchNextOp1();
-        vm->getRam()->updateBuses();
-        vm->getCpu()->fetchNextOp2();
         vm->cpuCycle();
         vm->displayRegisters();
         count++;
