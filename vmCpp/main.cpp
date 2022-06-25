@@ -21,7 +21,6 @@ int main(int argc, char *argv[])
 {
     uint32 ram_size;
     VirtualMachine *vm;
-    bool running = true;
 
     // checking correct args size
     if (argc < 2)
@@ -40,15 +39,6 @@ int main(int argc, char *argv[])
     //create the VM with the good RAM size
     vm = new VirtualMachine(ram_size);
     vm->getRam()->setMemoryTo("memory.mem");
-    //vm->displayRam();
-    int count = 0;
-    vm->displayRegisters();
-    while (count < 3)
-    {
-        printf("Cycle %d\n\n", count);
-        vm->cpuCycle();
-        vm->displayRegisters();
-        count++;
-    }
+    vm->run();
     delete (vm);
 }

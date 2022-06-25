@@ -64,22 +64,7 @@ Cpu* VirtualMachine::getCpu(void)
     return this->cpu;
 }
 
-void VirtualMachine::cpuCycle(void)
+void VirtualMachine::run(void)
 {
-    this->cpu->cycle();
-}
-
-void VirtualMachine::displayRegisters(void)
-{
-    uint64 *r = this->cpu->getGRegisters();
-    for (int i = 0; i < R_GCOUNT; i++)
-    {
-        printf("RG%d: 0x%lx\n", i, r[i]);
-    }
-    uint48 *r2 = this->cpu->getSRegisters();
-    for (int i = 0; i < R_SCOUNT; i++)
-    {
-        printf("RS%d: 0x%lx\n", i, r2[i].bits);
-    }
-    printf("\n");
+    this->cpu->run();
 }
