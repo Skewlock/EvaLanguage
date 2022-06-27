@@ -22,6 +22,10 @@ Peripheral::Peripheral(0, size)
     this->ram_size = size;
     this->ram = new uint8[this->ram_size];
     this->buses = b;
+    for (uint32 i = 0; i < this->ram_size; i++)
+    {
+        this->ram[i] = 0xFF;
+    }
 }
 
 /**
@@ -85,30 +89,6 @@ void Ram::storeAddr8(uint32 address, uint8 data)
 {
     this->ram[address] = data;
 }
-
-/**
- * @brief update the buses with the processor (and perform RAM op)
- * 
- */
-
-/*
-void Ram::updateBuses(void)
-{
-    uint64 data;
-    uint32 address = this->buses->getAddressBus();
-    uint8 rw = this->buses->getReadWritePin();
-    if (rw == READ) // if we're on read mode
-    {
-        data = this->readAddr64(address);
-        this->buses->setDataBus(data);
-    }
-    
-    if (rw == WRITE) // if we're on write mode
-    {
-        data = this->buses->getDataBus();
-        this->storeAddr64(address, data);
-    }
-}*/
 
 /**
  * @brief read a 32 bits int from memory
