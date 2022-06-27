@@ -44,21 +44,6 @@ Ram *VirtualMachine::getRam(void)
     return (this->ram);
 }
 
-/**
- * @brief display the ram in terminal
- * 
- */
-void VirtualMachine::displayRam(void)
-{
-    uint32 size = this->ram->getRamSize();
-    for (uint32 i = 0; i < size; i++)
-    {
-        printf("%02x ", this->ram->readAddr8(i));
-        if (i % 16 == 0)
-            printf("\n");
-    }
-}
-
 Cpu* VirtualMachine::getCpu(void)
 {
     return this->cpu;

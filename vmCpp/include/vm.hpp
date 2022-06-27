@@ -21,7 +21,6 @@ class VirtualMachine
     public:
         VirtualMachine(int ram_size);
         ~VirtualMachine();
-        void displayRam(void);
         Ram *getRam(void);
         Cpu *getCpu(void);
         void run(void);

@@ -20,8 +20,16 @@ Cpu::Cpu(Buses *b)
     this->running = true;
     this->buses = b;
     this->regG = new uint64[R_GCOUNT];
+    for (int i = 0; i < R_GCOUNT; i++)
+    {
+        this->regG[i] = 0;
+    }
     this->regG[R_PC] = 0x1000;
     this->regS = new uint48[R_SCOUNT];
+    for (int i = 0; i < R_SCOUNT; i++)
+    {
+        this->regS[i].bits = 0;
+    }
 }
 
 /**
@@ -103,11 +111,6 @@ void Cpu::decodeOp(void)
     this->inst_tab[4] = (inst.bits & 0x000F00000000) >> 32; // 1st OP
     this->inst_tab[5] = (inst.bits & 0x0000F0000000) >> 28; // 2nd OP
     this->inst_tab[6] = inst.bits & 0x00000FFFFFFF; // data/offset
-    //printf("CPU: %lx\n", inst.bits & 0xFC0000000000 >> 42);
-    /*for (int i = 0; i < 7; i++)
-    {
-        printf("inst[%d]: %lx\n", i, inst_tab[i]);
-    }*/
 }
 
 /**
@@ -460,7 +463,13 @@ void Cpu::executeOp()
             break;
         
         case OP_DIV:
-            //TODO
+            if (!this->inst_tab[1])
+            {
+                if (!this->inst_tab[2])
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] / this->regG[this->inst_tab[5]];
+                else
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] / this->inst_tab[6];
+            }
             break;
 
         case OP_AND:
@@ -577,6 +586,16 @@ void Cpu::executeOp()
         case OP_STW:
             data = this->regG[this->inst_tab[3]];
             this->buses->setBusesAndNotify(WRITE, this->regG[R_PC] + this->inst_tab[6], data, 8);
+            break;
+        
+        case OP_STH:
+            data = this->regG[this->inst_tab[3]];
+            this->buses->setBusesAndNotify(WRITE, this->regG[R_PC] + this->inst_tab[6], data, 4);
+            break;
+        
+        case OP_STB:
+            data = this->regG[this->inst_tab[3]];
+            this->buses->setBusesAndNotify(WRITE, this->regG[R_PC] + this->inst_tab[6], data, 1);
             break;
         
         case OP_END:
