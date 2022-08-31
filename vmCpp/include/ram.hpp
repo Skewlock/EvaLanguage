@@ -20,7 +20,7 @@ class Ram: public Peripheral
 
     public:
         Ram(uint32 size, Buses *b);
-        ~Ram();
+        virtual ~Ram();
         uint8 readAddr8(uint32 address);
         void storeAddr8(uint32 address, uint8 data);
         uint32 readAddr32(uint32 address);
