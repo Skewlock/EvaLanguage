@@ -120,6 +120,8 @@ void Cpu::decodeOp(void)
 void Cpu::executeOp()
 {
     bool n, z, c, v;
+    bool regs[R_GCOUNT];
+    int parse = 0;
     uint64 op = 0;
     uint64 res = 0;
     uint64 data = 0;
@@ -412,7 +414,8 @@ void Cpu::executeOp()
                 else
                     this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] + op;
             }
-            else{
+            else
+            {
                 // flag C
                 if (this->regG[this->inst_tab[5]] > (0xFFFFFFFFFFFFFFFF - this->regG[this->inst_tab[4]]))
                     this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000002;
@@ -460,6 +463,31 @@ void Cpu::executeOp()
                 else
                     this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] * this->inst_tab[6];
             }
+            else
+            {
+                if (!this->inst_tab[2])
+                {
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] * this->regG[this->inst_tab[5]];
+                    // flag V
+                    if ((this->regG[this->inst_tab[4]] != 0 && this->regG[this->inst_tab[3]] < this->regG[this->inst_tab[4]])
+                    || (this->regG[this->inst_tab[5]] != 0 && this->regG[this->inst_tab[3]] < this->regG[this->inst_tab[5]]))
+                        this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000001;
+                }
+                else
+                {
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] * this->inst_tab[6];
+                    if ((this->regG[this->inst_tab[4]] != 0 && this->regG[this->inst_tab[3]] < this->regG[this->inst_tab[4]])
+                    || (this->inst_tab[6] != 0 && this->regG[this->inst_tab[3]] < (uint64)this->inst_tab[6]))
+                        this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000001;
+                }
+                // flag Z
+                if (this->regG[this->inst_tab[3]] == 0)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000004;
+                
+                // flag N
+                if ((this->regG[this->inst_tab[3]] & 0x8000000000000000 >> 63) == 1)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000008;
+            }
             break;
         
         case OP_DIV:
@@ -469,6 +497,22 @@ void Cpu::executeOp()
                     this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] / this->regG[this->inst_tab[5]];
                 else
                     this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] / this->inst_tab[6];
+            }
+            else
+            {
+                //no flags C nor V
+                if (!this->inst_tab[2])
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] / this->regG[this->inst_tab[5]];
+                else
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] / this->inst_tab[6];
+
+                // flag Z
+                if (this->regG[this->inst_tab[3]] == 0)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000004;
+                
+                // flag N
+                if ((this->regG[this->inst_tab[3]] & 0x8000000000000000 >> 63) == 1)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000008;
             }
             break;
 
@@ -480,6 +524,22 @@ void Cpu::executeOp()
                 else
                     this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] & (this->inst_tab[6] | 0xFFFFFFFFF0000000);
             }
+            else 
+            {
+                // No flags C nor V
+                if (!this->inst_tab[2])
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] & this->regG[this->inst_tab[5]];
+                else
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] & (this->inst_tab[6] | 0xFFFFFFFFF0000000);
+
+                // flag Z
+                if (this->regG[this->inst_tab[3]] == 0)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000004;
+                
+                // flag N
+                if ((this->regG[this->inst_tab[3]] & 0x8000000000000000 >> 63) == 1)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000008;
+            }
             break;
         
         case OP_BOR:
@@ -489,6 +549,22 @@ void Cpu::executeOp()
                     this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] | this->regG[this->inst_tab[5]];
                 else
                     this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] | (this->inst_tab[6] | 0xFFFFFFFFF0000000);
+            }
+            else
+            {
+                // No flag C nor V
+                if (!this->inst_tab[2])
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] | this->regG[this->inst_tab[5]];
+                else
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] | (this->inst_tab[6] | 0xFFFFFFFFF0000000);
+
+                // flag Z
+                if (this->regG[this->inst_tab[3]] == 0)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000004;
+                
+                // flag N
+                if ((this->regG[this->inst_tab[3]] & 0x8000000000000000 >> 63) == 1)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000008;
             }
             break;
 
@@ -500,6 +576,22 @@ void Cpu::executeOp()
                 else
                     this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] ^ (this->inst_tab[6] | 0xFFFFFFFFF0000000);
             }
+            else
+            {
+                // No flag C nor V
+                if (!this->inst_tab[2])
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] ^ this->regG[this->inst_tab[5]];
+                else
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] ^ (this->inst_tab[6] | 0xFFFFFFFFF0000000);
+                
+                // flag Z
+                if (this->regG[this->inst_tab[3]] == 0)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000004;
+                
+                // flag N
+                if ((this->regG[this->inst_tab[3]] & 0x8000000000000000 >> 63) == 1)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000008;
+            }
             break;
         
         case OP_RSH:
@@ -510,15 +602,53 @@ void Cpu::executeOp()
                 else
                     this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] >> this->inst_tab[6];
             }
+            else
+            {
+                if (!this->inst_tab[2])
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] >> this->regG[this->inst_tab[5]];
+                else
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] >> this->inst_tab[6];
+
+                // flag Z
+                if (this->regG[this->inst_tab[3]] == 0)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000004;
+                
+                // flag N
+                if ((this->regG[this->inst_tab[3]] & 0x8000000000000000 >> 63) == 1)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000008;
+            }
             break;
         
         case OP_LSH:
             if (!this->inst_tab[1])
             {
                 if (!this->inst_tab[2])
-                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] >> this->regG[this->inst_tab[5]];
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] << this->regG[this->inst_tab[5]];
                 else
-                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] >> this->inst_tab[6];
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] << this->inst_tab[6];
+            }
+            else
+            {
+                if (!this->inst_tab[2])
+                {
+                    if ((this->regG[this->inst_tab[4]] >> (64 - this->regG[this->inst_tab[5]]) & 0x1) == 1)
+                        this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000002;
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] << this->regG[this->inst_tab[5]];
+                }
+                else
+                {
+                    if ((this->regG[this->inst_tab[4]] >> (64 - this->inst_tab[6]) & 0x1) == 1)
+                        this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000002;
+                    this->regG[this->inst_tab[3]] = this->regG[this->inst_tab[4]] << this->inst_tab[6];
+                }
+
+                // flag Z
+                if (this->regG[this->inst_tab[3]] == 0)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000004;
+                
+                // flag N
+                if ((this->regG[this->inst_tab[3]] & 0x8000000000000000 >> 63) == 1)
+                    this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000008;
             }
             break;
 
@@ -563,6 +693,7 @@ void Cpu::executeOp()
                 this->regS[R_SR].bits = this->regS[R_SR].bits | 0x000000000008;
             break;
 
+
         // Memory
 
         case OP_LDW:
@@ -570,34 +701,96 @@ void Cpu::executeOp()
             data = this->buses->getDataBus();
             this->regG[this->inst_tab[3]] = data;
             break;
-        
+
         case OP_LDH:
             this->buses->setBusesAndNotify(READ, this->regG[R_PC] + this->inst_tab[6], 4);
             data = this->buses->getDataBus();
             this->regG[this->inst_tab[3]] = data;
             break;
-        
+
         case OP_LDB:
             this->buses->setBusesAndNotify(READ, this->regG[R_PC] + this->inst_tab[6], 1);
             data = this->buses->getDataBus();
             this->regG[this->inst_tab[3]] = data;
             break;
-        
+
         case OP_STW:
             data = this->regG[this->inst_tab[3]];
             this->buses->setBusesAndNotify(WRITE, this->regG[R_PC] + this->inst_tab[6], data, 8);
             break;
-        
+
         case OP_STH:
             data = this->regG[this->inst_tab[3]];
             this->buses->setBusesAndNotify(WRITE, this->regG[R_PC] + this->inst_tab[6], data, 4);
             break;
-        
+
         case OP_STB:
             data = this->regG[this->inst_tab[3]];
             this->buses->setBusesAndNotify(WRITE, this->regG[R_PC] + this->inst_tab[6], data, 1);
             break;
-        
+
+        case OP_PSH:
+            for (int i = 0; i < R_GCOUNT; i++)
+            {
+                regs[i] = false;
+            }
+            parse = this->inst_tab[6] & 0xFFFF000;
+            regs[0] = parse & 0x8000;
+            regs[1] = parse & 0x4000;
+            regs[2] = parse & 0x2000;
+            regs[3] = parse & 0x1000;
+            regs[4] = parse & 0x0800;
+            regs[5] = parse & 0x0400;
+            regs[6] = parse & 0x0200;
+            regs[7] = parse & 0x0100;
+            regs[8] = parse & 0x0080;
+            regs[9] = parse & 0x0040;
+            regs[10] = parse & 0x0020;
+            regs[11] = parse & 0x0010;
+            regs[12] = parse & 0x0008;
+            regs[13] = parse & 0x0004;
+            regs[14] = parse & 0x0002;
+            regs[15] = parse & 0x0001;
+            for (int i = 0; i < R_GCOUNT; i++)
+            {
+                if (regs[i] == 1)
+                    this->buses->setBusesAndNotify(WRITE, this->regG[R_SP], this->regG[i], 8);
+            }
+            break;
+
+        case OP_POP:
+            for (int i = 0; i < R_GCOUNT; i++)
+            {
+                regs[i] = false;
+            }
+            parse = this->inst_tab[6] & 0xFFFF000;
+            regs[0] = parse & 0x8000;
+            regs[1] = parse & 0x4000;
+            regs[2] = parse & 0x2000;
+            regs[3] = parse & 0x1000;
+            regs[4] = parse & 0x0800;
+            regs[5] = parse & 0x0400;
+            regs[6] = parse & 0x0200;
+            regs[7] = parse & 0x0100;
+            regs[8] = parse & 0x0080;
+            regs[9] = parse & 0x0040;
+            regs[10] = parse & 0x0020;
+            regs[11] = parse & 0x0010;
+            regs[12] = parse & 0x0008;
+            regs[13] = parse & 0x0004;
+            regs[14] = parse & 0x0002;
+            regs[15] = parse & 0x0001;
+            for (int i = 0; i < R_GCOUNT; i++)
+            {
+                if (regs[i] == 1)
+                {
+                    this->buses->setBusesAndNotify(READ, this->regG[R_SP], 8);
+                    this->regG[i] = this->buses->getDataBus();
+                    this->regG[R_SP] -= 8;
+                }
+            }
+            break;
+
         case OP_END:
             this->running = false;
             break;
