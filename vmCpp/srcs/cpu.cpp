@@ -347,6 +347,10 @@ void Cpu::executeOp()
             this-> regG[R_PC] = this->regG[R_LR];
             break;
         
+        case OP_END:
+            this->running = false;
+            break;
+        
 
         // Operations
         
@@ -789,10 +793,6 @@ void Cpu::executeOp()
                     this->regG[R_SP] -= 8;
                 }
             }
-            break;
-
-        case OP_END:
-            this->running = false;
             break;
     }
 }
