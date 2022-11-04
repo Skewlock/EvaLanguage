@@ -3,10 +3,22 @@
 ## Summary:
 
  ### Virtual machine:
-
+- [usage](#usage)
  - [Registers](#registers)
  - [Specifications](#specifications)
  - [todo list](#todo-list)
+
+### Usage:
+
+To use the VM follow those simple steps:
+
+First, get the code from this repository (Either clone it or download it). Binaries are available, they have been compiled under Kubuntu 22.04. I have honestly no ideas if the code will work on windows because I'm unsure what makes a code cross platform or not. Try it and see.
+
+If you have the code, you should be able to compile it with the Makefile given. Do it.
+
+Then you can simply run the command `./vm.bin [optionnal_flags]` and observe the VM do its job. It's a very simple version, I'm working on it as much as I can.
+
+To see more details about the flags go to [the specifications page](#specifications).
 
 ### Registers:
 
