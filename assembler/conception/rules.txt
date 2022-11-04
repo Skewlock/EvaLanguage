@@ -1,0 +1,10 @@
+I- Data types:
+
+-constant number    : number as is (specified by the c in instruction)
+-constant char      : 'c' (c replaced by the char. It MUST be single quotes)
+-value in register  : rx (x replaced by a number)
+
+
+II- Instructions:
+
+-<instr> {s} {c} {dest register} {operand 1} ({operand 2} | {data})
