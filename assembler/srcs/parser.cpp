@@ -123,12 +123,12 @@ void Parser::parse(void)
         }
         // the numbers on the buffer are weird because the write() method writes
         // bytes in little endian (or big idk) and I need them in the reverse order
-        buff[1] = (converted_line >> 40) & 0xFF;
-        buff[0] = (converted_line >> 32) & 0xFF;
-        buff[3] = (converted_line >> 24) & 0xFF;
-        buff[2] = (converted_line >> 16) & 0xFF;
-        buff[5] = (converted_line >> 8) & 0xFF;
-        buff[4] = converted_line & 0xFF;
+        buff[0] = (converted_line >> 40) & 0xFF;
+        buff[1] = (converted_line >> 32) & 0xFF;
+        buff[2] = (converted_line >> 24) & 0xFF;
+        buff[3] = (converted_line >> 16) & 0xFF;
+        buff[4] = (converted_line >> 8) & 0xFF;
+        buff[5] = converted_line & 0xFF;
         //for (int i = 0; i < 6; i++)
         //    printf("%x ", buff[i]);
         printf("line: %llx\n", converted_line);
