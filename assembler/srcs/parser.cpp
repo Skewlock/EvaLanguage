@@ -135,6 +135,9 @@ void Parser::parse(void)
         output.write(buff, 6);
         this->curr_line++;
     }
+    for (int i = 0; i < 6; i++)
+        buff[i] = 0xFF;
+    output.write(buff, 6);
     output.close();
     std::cout << "Done !" << std::endl;
 }
