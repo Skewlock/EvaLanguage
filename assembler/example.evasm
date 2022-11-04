@@ -1,0 +1,83 @@
+part4:
+	mov c: r3, #0		@ neg = false
+	mov c: r5, #10		@ mul = 10
+	ldw: r2, =chaine	@ lire premier char
+	ldb: r0, r2         @ adressage post indexé
+
+selon:
+	cas1:
+		cmp r0, #'-'	@ char = '-'
+		bne cas2
+		mov r3, #1	@ neg = true
+		ldrb r0, [r2], #1
+		b finselon
+
+	cas2:
+		cmp r0, #'x'	@ char = 'x'
+		bne cas3
+		mov r5, #16	@ mul = 16
+		ldrb r0, [r2], #1
+		b finselon
+
+	cas3:
+		cmp r0, #'b'	@ char = 'b'
+		bne finselon
+		mov r5, #2	@ mul = 2
+		ldrb r0, [r2], #1
+		b finselon
+
+finselon:
+	mov r4, #0
+
+repeter:
+
+@ conversion d'un char en entier
+si1:
+	cmp r0, #'F'
+	bhi sinon1
+
+alors1:
+	si2:
+		cmp r0, #'A'	@ si char entre 'A' et 'F'
+		bcc finsi2
+
+	alors2:
+		sub r0, r0, #55	@ conversion lettre chiffre
+
+	finsi2:
+		b finsi1
+
+	si3:
+		cmp r0, #'9'	@ si cahr entre '0' et '9'
+		bhi finsi3
+
+	alors3:
+		sub r0, r0, #48	@ conversion char chiffre
+
+	finsi3:
+		b finsi1
+
+sinon1:
+	sub r0, r0, #87 	@ sinon (char entre 'a' et 'f')
+
+finsi1:
+	mul r4, r4, r5		@ calcul résultat
+	add r4, r4, r0
+	ldrb r0, [r2], #1	@ lire char suivant
+
+jusqua:
+	cmp r0, #0
+	bne repeter
+
+si4:
+	cmp r3, #1		@ si neg
+	bne finsi4
+
+alors4:
+	mov r6, #-1		@ n = -n
+	mul r4, r4, r6
+
+finsi4:
+	.end
+
+chaine:	.asciz "xABCDEF"
