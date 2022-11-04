@@ -4,4 +4,3 @@ mov r1 r2
 mov r2 r4
 mov c r3 44566
 cmp r1 r3
-jmp ne 1345677
