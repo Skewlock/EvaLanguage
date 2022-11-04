@@ -97,16 +97,22 @@ void Parser::parse(void)
 {
     std::ofstream output;
     char buff[6];
+    char header[0x1000];
     std::istringstream s(this->inFileContent);
     uint64 converted_line;
     output.open(this->outFileName);
     if (!output.is_open())
         return;
-    for (int i = 0; i < 0x1000; i++)
+    // header (1000 first bytes) filled with 0 for now
+    header[1] = 0xb1;
+    header[0] = 0x6b;
+    header[3] = 0x00;
+    header[2] = 0xb5;
+    for (int i = 4; i < 0x1000; i++)
     {
-        buff[0] = 0;
-        output.write(&buff[0], 1);
+        header[i] = 0;
     }
+    output.write(header, 0x1000);
     while(!std::getline(s, this->line).eof())
     {
         converted_line = this->parse_line();
@@ -115,12 +121,17 @@ void Parser::parse(void)
             output.close();
             return this->parse_failed();
         }
-        buff[0] = (converted_line & 0xFF0000000000) >> 40;
-        buff[1] = (converted_line & 0x00FF00000000) >> 32;
-        buff[2] = (converted_line & 0x0000FF000000) >> 24;
-        buff[3] = (converted_line & 0x000000FF0000) >> 16;
-        buff[4] = (converted_line & 0x00000000FF00) >> 8;
-        buff[5] = (converted_line & 0x0000000000FF);
+        // the numbers on the buffer are weird because the write() method writes
+        // bytes in little endian (or big idk) and I need them in the reverse order
+        buff[1] = (converted_line >> 40) & 0xFF;
+        buff[0] = (converted_line >> 32) & 0xFF;
+        buff[3] = (converted_line >> 24) & 0xFF;
+        buff[2] = (converted_line >> 16) & 0xFF;
+        buff[5] = (converted_line >> 8) & 0xFF;
+        buff[4] = converted_line & 0xFF;
+        //for (int i = 0; i < 6; i++)
+        //    printf("%x ", buff[i]);
+        printf("line: %llx\n", converted_line);
         output.write(buff, 6);
         this->curr_line++;
     }
