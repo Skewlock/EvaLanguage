@@ -30,5 +30,6 @@ int main(int argc, char *argv[])
     }
     parser = new Parser(inFileName, outFileName);
     parser->parse();
+    delete parser;
     return (0);
 }

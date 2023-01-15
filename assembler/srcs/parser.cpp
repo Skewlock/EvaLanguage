@@ -88,6 +88,11 @@ Parser::Parser(std::string ifn, std::string ofn)
     this->conditions["AL"] = 0b1110;
 }
 
+Parser::~Parser()
+{
+    delete this->preprocessor;
+}
+
 void Parser::parse_failed(void)
 {
     std::cerr << "Parse failed !" << std::endl;

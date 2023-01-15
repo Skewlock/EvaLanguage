@@ -10,6 +10,7 @@ class Preprocessor
 {
     public:
         Preprocessor(std::string &in);
+        ~Preprocessor();
         std::map<std::string, int> process(void);
 
     private:

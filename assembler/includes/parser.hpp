@@ -15,6 +15,7 @@ class Parser
 {
     public:
         Parser(std::string ifn, std::string ofn);
+        ~Parser();
         void parse(void);
         uint64 parse_line(void);
         std::string read_file(void);
