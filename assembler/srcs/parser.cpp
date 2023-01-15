@@ -3,33 +3,49 @@
 #include <iostream>
 #include <vector>
 
-std::string to_upper(std::string str)
-{
-    for (unsigned long int i = 0; i < str.length(); i++)
-    {
-        if (str[i] >= 'a' && str[i] <= 'z')
-            str[i] = str[i] - 32;
-    }
-    return (str);
-}
-
 std::vector<std::string> split(std::string s, char del = ' ')
 {
     std::vector<std::string> res;
     std::string tok;
     std::stringstream stream(s);
+
     while(std::getline(stream, tok, del))
         res.push_back(tok);
     return res;
+}
+
+std::string Parser::read_file(void)
+{
+    std::string line;
+    std::string final_file = "";
+    std::ifstream file;
+
+    file.open(this->inFileName);
+    if (!file.is_open())
+        return (NULL);
+    while (getline(file, line))
+    {
+        if (line != "")
+            final_file += (line + "\n");
+    }
+    return (final_file);
+}
+
+bool is_number(char c)
+{
+    return (c >= '0' && c <= '9');
 }
 
 Parser::Parser(std::string ifn, std::string ofn)
 {
     this->inFileName = ifn;
     this->outFileName = ofn;
-    this->inFileContent = this->purify_file();
+    this->inFileContent = this->read_file();
+    std::string &input = this->inFileContent;
+    this->preprocessor = new Preprocessor(input);
     this->curr_line = 1;
     this->line = "";
+    this->error = NULL;
 
     this->instructions["ADD"] = 0b01000000;
     this->instructions["SUB"] = 0b01000100;
@@ -72,72 +88,77 @@ Parser::Parser(std::string ifn, std::string ofn)
     this->conditions["AL"] = 0b1110;
 }
 
-std::string Parser::purify_file(void)
-{
-    std::string line;
-    std::string final_file = "";
-    std::ifstream file;
-    file.open(this->inFileName);
-    if (!file.is_open())
-        return (NULL);
-    while (getline(file, line))
-    {
-        if (line != "")
-            final_file += (line + "\n");
-    }
-    return (final_file);
-}
-
 void Parser::parse_failed(void)
 {
     std::cerr << "Parse failed !" << std::endl;
 }
 
-void Parser::parse(void)
+void Parser::write_header(std::ofstream *output)
 {
-    std::ofstream output;
-    char buff[6];
     char header[0x1000];
-    std::istringstream s(this->inFileContent);
-    uint64 converted_line;
-    output.open(this->outFileName);
-    if (!output.is_open())
-        return;
-    // header (1000 first bytes) filled with 0 for now
-    header[1] = 0xb1;
-    header[0] = 0x6b;
-    header[3] = 0x00;
-    header[2] = 0xb5;
+
+    // header (0x1000 first bytes) filled with 0 for now
+    // except B00BBEE5.
+    header[1] = 0xb0;
+    header[0] = 0x0b;
+    header[3] = 0xb3;
+    header[2] = 0x35;
     for (int i = 4; i < 0x1000; i++)
     {
         header[i] = 0;
     }
-    output.write(header, 0x1000);
+    output->write(header, 0x1000);
+}
+
+void Parser::write_line(std::ofstream *output, uint64 line)
+{
+    char buff[6];
+
+    buff[0] = (line >> 40) & 0xFF;
+    buff[1] = (line >> 32) & 0xFF;
+    buff[2] = (line >> 24) & 0xFF;
+    buff[3] = (line >> 16) & 0xFF;
+    buff[4] = (line >> 8) & 0xFF;
+    buff[5] = line & 0xFF;
+    output->write(buff, 6);
+}
+
+void Parser::write_last(std::ofstream *output)
+{
+    char buff[6];
+
+    for (int i = 0; i < 6; i++)
+        buff[i] = 0xFF;
+    output->write(buff, 6);
+}
+
+void Parser::parse(void)
+{
+    uint64 converted_line;
+    std::ofstream output;
+
+    this->labels = this->preprocessor->process();
+    std::istringstream s(this->inFileContent);
+    std::cout << this->inFileContent << std::endl;
+    output.open(this->outFileName);
+    if (!output.is_open())
+    {
+        this->error = new FileError(this->curr_line, 0, this->inFileName, "Cannot open file.");
+        this->error->display_error(FileError::type);
+        return;
+    }
+
+    this->write_header(&output);
+    // main parsing, replacing each line with it's binary equivalent
     while(!std::getline(s, this->line).eof())
     {
         converted_line = this->parse_line();
-        if (converted_line == 18446744073709551615ULL)
-        {
-            output.close();
+        if (this->error != NULL) // if an error is thrown
             return this->parse_failed();
-        }
-        // the numbers on the buffer are weird because the write() method writes
-        // bytes in little endian (or big idk) and I need them in the reverse order
-        buff[0] = (converted_line >> 40) & 0xFF;
-        buff[1] = (converted_line >> 32) & 0xFF;
-        buff[2] = (converted_line >> 24) & 0xFF;
-        buff[3] = (converted_line >> 16) & 0xFF;
-        buff[4] = (converted_line >> 8) & 0xFF;
-        buff[5] = converted_line & 0xFF;
-        //for (int i = 0; i < 6; i++)
-        //    printf("%x ", buff[i]);
-        printf("line: %llx\n", converted_line);
-        output.write(buff, 6);
+        this->write_line(&output, converted_line);
         this->curr_line++;
     }
-    for (int i = 0; i < 6; i++)
-        buff[i] = 0xFF;
-    output.write(buff, 6);
+    this->write_last(&output);
     output.close();
     std::cout << "Done !" << std::endl;
 }
@@ -145,15 +166,16 @@ void Parser::parse(void)
 uint64  Parser::parse_line(void)
 {
     bool constant = false;
-    this->line = to_upper(this->line);
     std::vector<std::string> splitted;
+    std::cout << this->line << std::endl;
     splitted = split(this->line);
     uint64 converted_line = 0;
 
     // parsing opcode
     if (this->instructions.find(splitted.at(0)) == this->instructions.end())
     {
-        std::cout << "Error: instruction: \"" << splitted.at(0) << "\" incorrect.\nLine: " << this->curr_line << std::endl;
+        this->error = new SyntaxError(this->curr_line, 0, this->inFileName,"invalid instruction");
+        this->error->display_error(SyntaxError::type);
         return (-1);
     }
     converted_line |= this->instructions[splitted.at(0)];
@@ -192,7 +214,8 @@ uint64  Parser::parse_line(void)
     {
         if (this->conditions.find(splitted.at(1)) == this->conditions.end())
         {
-            std::cout << "Error: condition: \"" << splitted.at(1) << "\" incorrect.\nLine: " << this->curr_line << std::endl;
+            this->error = new SyntaxError(this->curr_line, 0, this->inFileName, "incorrect condition:");
+            this->error->display_error(SyntaxError::type);
             return (-1);
         }
         converted_line |= this->conditions[splitted.at(1)];
@@ -232,7 +255,16 @@ uint64  Parser::parse_line(void)
     }
     else if (splitted.at(0) == "JMP" || splitted.at(0) == "BRX")
     {
-        converted_line |= std::stoi((std::string) splitted.at(1));
+        if (is_number(splitted.at(1)[0]))
+            converted_line |= std::stoi((std::string) splitted.at(1));
+        else if (this->labels.find(splitted.at(1)) != this->labels.end())
+            converted_line |= this->labels[splitted.at(1)];
+        else 
+        {
+            this->error = new SyntaxError(this->curr_line, 0, this->inFileName, "label doesn't exists.");
+            this->error->display_error(SyntaxError::type);
+            return (-1);
+        }
         splitted.erase(std::next(splitted.begin()));
     }
     else if ((converted_line & 0xC00000000000) >> 46 == 2)
