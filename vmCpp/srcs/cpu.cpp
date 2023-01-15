@@ -38,8 +38,8 @@ Cpu::Cpu(Buses *b)
  */
 Cpu::~Cpu()
 {
-    delete this->regG;
-    delete this->regS;
+    delete [] this->regG;
+    delete [] this->regS;
 }
 
 /**
@@ -827,7 +827,7 @@ void Cpu::displayRegisters(void)
     uint48 *r2 = this->getSRegisters();
     for (int i = 0; i < R_SCOUNT; i++)
     {
-        printf("RS%d: 0x%lx\n", i, r2[i].bits);
+        printf("RS%d: 0x%lx\n", i, (uint64)r2[i].bits);
     }
     printf("\n");
 }
