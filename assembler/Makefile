@@ -1,5 +1,5 @@
 CC		=	g++
-CFLAGS	=	-Wall -Wextra
+CFLAGS	=	-Wall -Wextra -Werror
 SRC_DIR	=	srcs
 OBJ_DIR	=	obj
 INCLUDE	=	includes
@@ -22,6 +22,6 @@ clean:	$(BIN)
 fclean: clean
 	rm -rf $(BIN)
 
-re: fclean all
+re: all fclean
 
 .PHONY: clean fclean re all

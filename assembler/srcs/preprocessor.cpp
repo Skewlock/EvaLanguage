@@ -9,6 +9,12 @@ input(in)
     this->output = "";
 }
 
+Preprocessor::~Preprocessor()
+{
+    if (this->error != NULL)
+        delete this->error;
+}
+
 bool is_whitespace(char c)
 {
     return ((c > 7 && c < 14) || c == 32);
