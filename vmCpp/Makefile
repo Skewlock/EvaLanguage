@@ -1,5 +1,5 @@
 CC		=	g++
-CFLAGS	=	-Wall -Wextra
+CFLAGS	=	-Wall -Wextra -Werror
 SRC_DIR	=	srcs
 OBJ_DIR	=	obj
 SRCS	=	$(wildcard $(SRC_DIR)/*.cpp)

@@ -34,7 +34,7 @@ Peripheral::Peripheral(0, size)
  */
 Ram::~Ram()
 {
-    delete ram;
+    delete [] ram;
     delete buses;
 }
 
