@@ -799,35 +799,28 @@ void Cpu::executeOp()
 
 void Cpu::cycle(void)
 {
-    this->fetchNextOp();
-    this->decodeOp();
-    this->executeOp();
-}
-
-void Cpu::run(void)
-{
-    int count = 0;
-    while (running)
+    if (this->running)
     {
-        this->cycle();
-        printf("Cycle %d:\n", count);
-        this->displayRegisters();
-        count++;
+        this->fetchNextOp();
+        this->decodeOp();
+        this->executeOp();
     }
-    printf("Ending...\n");
 }
 
 void Cpu::displayRegisters(void)
 {
-    uint64 *r = this->getGRegisters();
-    for (int i = 0; i < R_GCOUNT; i++)
+    if (this->running)
     {
-        printf("RG%d: 0x%lx\n", i, r[i]);
+        uint64 *r = this->getGRegisters();
+        for (int i = 0; i < R_GCOUNT; i++)
+        {
+            printf("RG%d: 0x%lx\n", i, r[i]);
+        }
+        uint48 *r2 = this->getSRegisters();
+        for (int i = 0; i < R_SCOUNT; i++)
+        {
+            printf("RS%d: 0x%lx\n", i, (uint64)r2[i].bits);
+        }
+        printf("\n");
     }
-    uint48 *r2 = this->getSRegisters();
-    for (int i = 0; i < R_SCOUNT; i++)
-    {
-        printf("RS%d: 0x%lx\n", i, (uint64)r2[i].bits);
-    }
-    printf("\n");
 }

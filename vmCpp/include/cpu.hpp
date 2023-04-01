@@ -3,6 +3,7 @@
 
 #include "general.hpp"
 #include "buses.hpp"
+#include <SDL2/SDL.h>
 
 class Buses;
 
@@ -102,7 +103,6 @@ class Cpu
         void setSRegisters(int r, uint48 value);
         void init(void);
         void cycle(void);
-        void run(void);
         void displayRegisters(void);
 };
 

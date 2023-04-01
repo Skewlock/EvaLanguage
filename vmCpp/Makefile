@@ -1,5 +1,6 @@
 CC		=	g++
 CFLAGS	=	-Wall -Wextra -Werror
+SDLFLAG	=	-lSDL2_image -g `sdl2-config --cflags --libs`
 SRC_DIR	=	srcs
 OBJ_DIR	=	obj
 SRCS	=	$(wildcard $(SRC_DIR)/*.cpp)
@@ -9,7 +10,7 @@ BIN		=	vm.bin
 all:	$(BIN)
 
 $(BIN):	$(OBJ)
-	$(CC) -o $(BIN) $(CFLAGS) main.cpp $(OBJ)
+	$(CC) -o $(BIN) $(CFLAGS) main.cpp $(OBJ) $(SDLFLAG)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CC) $(CFLAGS) -o $@ -c $<

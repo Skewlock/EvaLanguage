@@ -2,6 +2,7 @@
 #define VM_HPP
 
 #include "general.hpp"
+#include "gpu.hpp"
 #include "cpu.hpp"
 #include "ram.hpp"
 #include "buses.hpp"
@@ -13,6 +14,7 @@ class Buses;
 class VirtualMachine
 {
     private:
+        Gpu *gpu;
         Cpu *cpu;
         Ram *ram;
         uint64 dataBus;

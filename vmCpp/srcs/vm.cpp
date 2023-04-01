@@ -19,6 +19,7 @@ VirtualMachine::VirtualMachine(int ram_size)
 {
     Buses *b = new Buses();
     // buses instance must be the same between CPU and RAM
+    this->gpu = new Gpu(b, 640, 360);
     this->ram = new Ram(ram_size, b);
     this->cpu = new Cpu(b);
     b->addObserver(this->ram);
@@ -32,6 +33,7 @@ VirtualMachine::~VirtualMachine()
 {
     delete this->ram;
     delete this->cpu;
+    delete this->gpu;
 }
 
 /**
@@ -51,5 +53,23 @@ Cpu* VirtualMachine::getCpu(void)
 
 void VirtualMachine::run(void)
 {
-    this->cpu->run();
+    SDL_Event e;
+    int count = 0;
+
+    bool running = true;
+    while (running)
+    {
+        while (SDL_PollEvent(&e) != 0) {
+            if (e.type == SDL_QUIT) {
+                running = false;
+            }
+        }
+        this->cpu->cycle();
+        printf("Cycle %d:\n", count);
+        this->cpu->displayRegisters();
+        this->gpu->updateTexture();
+        this->gpu->displayFrame();
+        count++;
+    }
+    printf("Ending...\n");
 }
