@@ -4,7 +4,7 @@
 #include "buses.hpp"
 #include "peripheral.hpp"
 #include <SDL2/SDL.h>
-#define END_ADDRESS 4294967295
+#define END_ADDRESS 0xFFFFFFFF
 
 class Gpu: public Peripheral
 {

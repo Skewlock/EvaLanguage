@@ -2,7 +2,7 @@
 #include <iostream>
 
 Gpu::Gpu(Buses *b, int width, int height):
-Peripheral::Peripheral(END_ADDRESS - (width * height * 3), END_ADDRESS)
+Peripheral::Peripheral(END_ADDRESS - (width * height * 4), END_ADDRESS)
 {
     this->buses = b;
     this->width = width;
@@ -10,7 +10,7 @@ Peripheral::Peripheral(END_ADDRESS - (width * height * 3), END_ADDRESS)
     this->frameBuffer = new uint8[width * height * 4];
 
     for (long int i = 0; i < (width * height * 4); i++)
-        this->frameBuffer[i] = 255;
+        this->frameBuffer[i] = 0;
 
     if(SDL_Init(SDL_INIT_VIDEO) != 0) // SDL_INIT_AUDIO
     {
