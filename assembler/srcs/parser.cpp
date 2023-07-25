@@ -142,7 +142,7 @@ void Parser::parse(void)
     uint64 converted_line;
     std::ofstream output;
 
-    this->labels = this->preprocessor->process();
+    this->preprocessor->process();
     std::istringstream s(this->inFileContent);
     std::cout << this->inFileContent << std::endl;
     output.open(this->outFileName);

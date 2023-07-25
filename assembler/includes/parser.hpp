@@ -7,9 +7,7 @@
 #include <map>
 #include "errors.hpp"
 #include "preprocessor.hpp"
-
-typedef unsigned long long uint64;
-typedef unsigned long uint32;
+#include "general.hpp"
 
 class Parser
 {
@@ -28,9 +26,11 @@ class Parser
         std::string inFileContent;
         std::string outFileName;
         std::string inFileName;
-        std::map<std::string, int> instructions;
-        std::map<std::string, int> conditions;
-        std::map<std::string, int> labels;
+        std::map<std::string, uint8> instructions;
+        std::map<std::string, uint8> conditions;
+        std::map<std::string, uint32> labels;
+        std::map<std::string, uint32> bss;
+        std::map<std::string, uint64> data;
         Preprocessor *preprocessor;
         Error *error;
         void write_header(std::ofstream *output);
